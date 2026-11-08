@@ -1,2 +1,4 @@
 ﻿<Solution>
+  <Project Path="Unity.Splines.Examples.csproj" />
+  <Project Path="Unity.Splines.Examples.Editor.csproj" />
 </Solution>
