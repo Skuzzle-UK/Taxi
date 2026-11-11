@@ -27,6 +27,10 @@ public class CarController : DebuggableObject
     [SerializeField] Transform[] steeringFixedPoint;
     [Tooltip("Steering angle at full lock when stationary (degrees). At top speed it drops to 40% of this.")]
     [SerializeField] float maxSteerAngle = 55f;
+    [Tooltip("How fast the steering turns towards the input (full lock per second). Stops keyboard steering snapping straight to full lock. Very high values make it instant.")]
+    [SerializeField] float steerSpeed = 5f;
+    [Tooltip("How fast the steering straightens up or swaps sides (full lock per second). Usually faster than Steer Speed so the car recovers quickly.")]
+    [SerializeField] float steerReturnSpeed = 8f;
 
     [Header("Acceleration")]
     [Tooltip("Drive acceleration at full throttle from a standstill (m/s²). It tapers to zero as the car nears its top speed.")]
@@ -95,8 +99,10 @@ public class CarController : DebuggableObject
 
     private float SetSteerRate()
     {
-        var stickAngle = _controls.Car.Steer.ReadValue<Vector2>();
-        return stickAngle.x;
+        float input = _controls.Car.Steer.ReadValue<Vector2>().x;
+        bool returning = Mathf.Abs(input) < Mathf.Abs(_steerRate) || input * _steerRate < 0f;
+        float speed = returning ? steerReturnSpeed : steerSpeed;
+        return Mathf.MoveTowards(_steerRate, input, speed * Time.deltaTime);
     }
 
     private float SetAccelRate()
